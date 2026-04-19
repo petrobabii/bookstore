@@ -1,90 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col, Alert, Accordion } from 'react-bootstrap';
 import BookCard from './BookCard';
 import Busket from './Busket';
 import { BsCart3 } from 'react-icons/bs';
 import Pagination from 'react-bootstrap/Pagination';
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
-
-const favorites = () => JSON.parse(localStorage.getItem('favorites')) || [];
-const getBusket = () => JSON.parse(localStorage.getItem('busket')) || [];
+import { useBusket } from '../hooks/useBusket';
+import { useBooks } from '../hooks/useBooks';
 
 function AllComponents() {
-  const [books, setBooks] = useState([]);
   const [show, setShow] = useState(false);
   const [selectedBook, setSelectedBook] = useState("");
-  const [favouriteBooks, setFavouriteBooks] = useState(favorites());
-  const [busketItems, setBusketItems] = useState(getBusket());
-  const [isBusketOpen, setIsBusketOpen] = useState(false);
-  const [selectedAuthor, setSelectedAuthor] = useState("Всі");
-  const [activePage, setActivePage] = useState(0);
-  const [sortOrder, setSortOrder] = useState("default");
+  const {busketItems, isBusketOpen, setIsBusketOpen, favouriteBooks, handleAddToBusket, handleRemoveFromBusket, handleChangeQty, handleClearBusket,
+    setFavouriteItem, checkIsFavourite, totalQty} = useBusket();
+  const {books: sortedBooks, authors, selectedAuthor, setSelectedAuthor, sortOrder, setSortOrder, activePage, setActivePage } = useBooks();
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      const querySnapshot = await getDocs(collection(db, "books"));
-      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setBooks(data);
-    };
-    fetchBooks();
-  }, []);
 
   const handleShowDetails = (title) => {
     setSelectedBook(title);
     setShow(true);
   }
 
-  const setFavouriteItem = (id) => {
-    const isFavorite = checkIsFavourite(id);
-    setFavouriteBooks(isFavorite ? favouriteBooks.filter(favouriteItem => favouriteItem !== id) : [...favouriteBooks, id]);
-  }
-  
-  const checkIsFavourite = (id) => {
-    return favouriteBooks.find(favouriteItem => favouriteItem === id);
-  }
-
-  const handleAddToBusket = (book) => {
-    const exists = busketItems.find((item) => item.id === book.id);
-    if (exists) {
-      setBusketItems(
-        busketItems.map((item) => item.id === book.id ? { ...item, qty: item.qty + 1 } : item)
-      );
-    } else {
-      setBusketItems([...busketItems, { ...book, qty: 1 }]);
-    }
-    setIsBusketOpen(true);
-  };
-
-  const handleRemoveFromBusket = (id) => {
-    setBusketItems(busketItems.filter((item) => item.id !== id));
-  };
-
-  const handleChangeQty = (id, delta) => {
-    const updated = busketItems
-      .map((item) => item.id === id ? { ...item, qty: item.qty + delta } : item)
-      .filter((item) => item.qty > 0);
-    setBusketItems(updated);
-  };
-
-  const totalQty = busketItems.reduce((sum, item) => sum + item.qty, 0);
-
-  const authors = ["Всі", ...new Set(books.map((book) => book.text))];
-
-  const filteredBooks = selectedAuthor === "Всі" ? books : books.filter((book) => book.text === selectedAuthor);
-
-  const sortedBooks = sortOrder === "asc" ? [...filteredBooks].sort((a, b) => a.price - b.price) : sortOrder === "desc" 
-  ? [...filteredBooks].sort((a, b) => b.price - a.price) : filteredBooks;
-
   const booksPerPage = 6;
 
   const offset = activePage * booksPerPage;
   
   const currentBooks = sortedBooks.slice(offset, offset + booksPerPage);
-
-  const handleClearBusket = () => {
-    setBusketItems([]);
-  };
 
   let items = [];
   for (let number = 1; number <= Math.ceil(sortedBooks.length/6); number++) {
@@ -101,16 +41,12 @@ function AllComponents() {
     </div>
   );
 
-  useEffect(() => {
-        localStorage.setItem('favorites', JSON.stringify(favouriteBooks) );
-        localStorage.setItem('busket', JSON.stringify(busketItems));
-    }, [favouriteBooks, busketItems]);
-
   return(
     <>
       {show && (
         <Alert 
-          variant="dark" onClose={() => setShow(false)} dismissible className="shadow-sm border-0 mt-3">
+          variant="dark" onClose={() => setShow(false)} dismissible 
+          className="shadow-sm border-0 mt-3">
           <h4 className="alert-heading">Обрана книга: {selectedBook}</h4>
           <p className="mb-0">
             Ця книга доступна для замовлення. Доставка протягом 2-х днів.
