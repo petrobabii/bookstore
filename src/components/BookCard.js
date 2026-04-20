@@ -12,7 +12,7 @@ function BookCard(props) {
         </div>
       </div>
 
-      <Card.Img variant="top" src={props.card.imgurl} className="book-img" />
+      <Card.Img variant="top" src={`${process.env.REACT_APP_IMAGES}${props.card.imgurl}`} className="book-img" />
 
       <Card.Body>
         <Card.Title>{props.card.title}</Card.Title>
