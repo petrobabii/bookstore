@@ -10,8 +10,19 @@ import { useBooks } from '../hooks/useBooks';
 function AllComponents() {
   const [show, setShow] = useState(false);
   const [selectedBook, setSelectedBook] = useState("");
-  const {busketItems, isBusketOpen, setIsBusketOpen, favouriteBooks, handleAddToBusket, handleRemoveFromBusket, handleChangeQty, handleClearBusket,
-    setFavouriteItem, checkIsFavourite, totalQty} = useBusket();
+  const {
+    busketItems,
+    isBusketOpen,
+    setIsBusketOpen,
+    favouriteBooks,
+    handleAddToBusket,
+    handleRemoveFromBusket,
+    handleChangeQty,
+    handleClearBusket,
+    setFavouriteItem,
+    checkIsFavourite,
+    totalQty
+  } = useBusket();
   const {books: sortedBooks, authors, selectedAuthor, setSelectedAuthor, sortOrder, setSortOrder, activePage, setActivePage } = useBooks();
 
 

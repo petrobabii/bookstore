@@ -8,7 +8,7 @@ export const useOrders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState(null);
-    const adminEmail = "petro.babii-ip232@nung.edu.ua";
+    const adminEmail = process.env.REACT_APP_ADMIN_EMAIL;
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -44,7 +44,7 @@ export const useOrders = () => {
         }
         };
         fetchOrders();
-      }, [user]);
+      }, [user, adminEmail]);
 
       return {user, orders, setOrders, loading, error, isAdmin: user?.email === adminEmail};
 };
